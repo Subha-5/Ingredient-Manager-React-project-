@@ -23,7 +23,7 @@ const Search = React.memo(({ onLoadIngredients }) => {
             amount: responseData[key].amount,
           })
         }
-        // onLoadIngredients(loadedIngredients)
+        onLoadIngredients(loadedIngredients)
       })
   }, [enteredFilter, onLoadIngredients])
 

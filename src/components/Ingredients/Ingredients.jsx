@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, Component } from 'react';
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
@@ -8,24 +8,11 @@ const Ingredients = () => {
 
   const [ingredients, setIngredients] = useState([]);
 
-  useEffect(() => {
-    fetch('https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients.json')
-      .then(response => response.json())
-      .then(responseData => {
-        const loadedIngredients = [];
-        for (const key in responseData) {
-          loadedIngredients.push({
-            id: key,
-            title: responseData[key].title,
-            amount: responseData[key].amount
-          })
-        }
-        setIngredients(loadedIngredients);
-      })
-  }, [])
+  // No need for useEffect to fetch ingredients in this Component
+  // since Search Component is already fetching it in the first initial render
 
-  useEffect( () => {
-    console.log('RENDERING INGREDIENTS', ingredients)
+  useEffect(() => {
+    console.log('RENDERING INGREDIENTS ... ', ingredients)
   }, [ingredients])
 
 
@@ -48,9 +35,11 @@ const Ingredients = () => {
     setIngredients(prevIngredients => prevIngredients.filter(ingredient => ingredient.id !== ingredientID))
   }
 
-  const filteredIngredientsHandler = (filteredIngredients) => {
-    setIngredients(filteredIngredients);
-  }
+  const filteredIngredientsHandler =
+    useCallback(
+      filteredIngredients =>
+        setIngredients(filteredIngredients)
+      , [])
 
   return (
     <div className="App">

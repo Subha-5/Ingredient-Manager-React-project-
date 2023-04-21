@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
@@ -9,7 +9,22 @@ const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
 
   const addIngredientHandler = (ingredient) => {
-    setIngredients(prevIngredients => {return [...prevIngredients, {id: Math.random().toString(), ...ingredient}]});
+    fetch('https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients.json', {
+      method: 'POST',
+      body: JSON.stringify(ingredient),
+      headers: { 'Content-Type': 'application/json' }
+    }).then(response => {
+      return response.json()
+    }).then(responseData => {
+      setIngredients(prevIngredients =>
+        [...prevIngredients,
+        { id: Math.random().toString(), ...ingredient }
+        ])
+    })
+  }
+
+  const removeIngredientHandler = (ingredientID) => {
+    setIngredients(prevIngredients => prevIngredients.filter(ingredient => ingredient.id !== ingredientID))
   }
 
   return (
@@ -18,7 +33,7 @@ const Ingredients = () => {
 
       <section>
         <Search />
-        <IngredientList ingredients={ingredients} onRemoveItem={() => {}} />
+        <IngredientList ingredients={ingredients} onRemoveItem={removeIngredientHandler} />
       </section>
     </div>
   );

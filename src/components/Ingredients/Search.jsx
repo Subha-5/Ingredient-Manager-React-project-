@@ -9,7 +9,7 @@ const Search = React.memo(({ onLoadIngredients }) => {
   const inputRef = useRef()
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const oldEnteredFilterValue = enteredFilter           // inside closure; locked (at value when setTimeout starts)
       const newEnteredFilterValue = inputRef.current.value // outside the closure; not locked
       if(oldEnteredFilterValue === newEnteredFilterValue){
@@ -34,6 +34,9 @@ const Search = React.memo(({ onLoadIngredients }) => {
           })
         }
       }, 500)
+      return () => {
+        clearTimeout(timer)
+      }
   }, [enteredFilter, onLoadIngredients, inputRef])
 
   return (

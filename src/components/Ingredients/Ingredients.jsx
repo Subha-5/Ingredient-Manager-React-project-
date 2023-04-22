@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useReducer } from 'react';
+import React, { useEffect, useCallback, useReducer } from 'react';
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
@@ -18,14 +18,27 @@ const ingredientReducer = (currentIngredients, action) => {
   }
 }
 
+const httpReducer = (currentHTTPState, action) => {
+  switch (action.type) {
+    case 'SEND':
+      return { loading: true, error: null }
+    case 'RESPONSE':
+      return { ...currentHTTPState, loading: false }
+    case 'ERROR':
+      return { loading: false, error: action.errorMessage }
+    case 'CLEAR_ERR':
+      return { ...currentHTTPState, error: null }
+    default:
+      throw new Error('Should not be reached!')
+  }
+}
+
 const Ingredients = () => {
 
   const initialIngrdients = []
   const [ingredients, dispatch] = useReducer(ingredientReducer, initialIngrdients)
 
-  // const [ingredients, setIngredients] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const [httpState, dispatchHTTP] = useReducer(httpReducer, { loading: false, error: null })
 
   // No need for useEffect to fetch ingredients in this Component
   // since Search Component is already fetching it in the first initial render
@@ -36,33 +49,31 @@ const Ingredients = () => {
 
 
   const addIngredientHandler = (ingredient) => {
-    setIsLoading(true)
+    dispatchHTTP({ type: 'SEND' })
     fetch('https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients.json', {
       method: 'POST',
       body: JSON.stringify(ingredient),
       headers: { 'Content-Type': 'application/json' }
     }).then(response => {
-      setIsLoading(false)
+      dispatchHTTP({ type: 'RESPONSE' })
       return response.json()
     }).then(responseData => {
       dispatch({ type: 'ADD', ingredient: { id: responseData.name, ...ingredient } })
     }).catch(error => {
-      setError("Something went wrong!")
-      setIsLoading(false)
+      dispatchHTTP({ type: 'ERROR', errorMessage: 'Something went wrong!' })
     })
   }
 
   const removeIngredientHandler = (ingredientID) => {
-    setIsLoading(true)
+    dispatchHTTP({ type: 'SEND' })
     fetch(`https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients/${ingredientID}.json`, {
       method: 'DELETE',
     }).then(response => {
-      setIsLoading(false)
-      dispatch({type: 'DELETE', id: ingredientID})
+      dispatchHTTP({ type: 'RESPONSE' })
+      dispatch({ type: 'DELETE', id: ingredientID })
     }
     ).catch(error => {
-      setError("Something went wrong!")
-      setIsLoading(false)
+      dispatchHTTP({ type: 'ERROR', errorMessage: 'Something went wrong!' })
     })
   }
 
@@ -73,17 +84,17 @@ const Ingredients = () => {
       , [])
 
   const clearError = () => {
-    setError(null)
+    dispatchHTTP({type: 'CLEAR_ERR'})
   }
 
   return (
     <div className="App">
 
-      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
+      {httpState.error && <ErrorModal onClose={clearError}>{httpState.error}</ErrorModal>}
 
       <IngredientForm
         onAddIngredient={addIngredientHandler}
-        loading={isLoading}
+        loading={httpState.loading}
       />
 
       <section>

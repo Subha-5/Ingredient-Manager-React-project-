@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Ingredient-Manager-React-project-/static/css/main.a0b0c0ad.css",
+    "main.js": "/Ingredient-Manager-React-project-/static/js/main.724bcf81.js",
+    "index.html": "/Ingredient-Manager-React-project-/index.html",
+    "main.a0b0c0ad.css.map": "/Ingredient-Manager-React-project-/static/css/main.a0b0c0ad.css.map",
+    "main.724bcf81.js.map": "/Ingredient-Manager-React-project-/static/js/main.724bcf81.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a0b0c0ad.css",
+    "static/js/main.724bcf81.js"
+  ]
+}

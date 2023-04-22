@@ -1,13 +1,29 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useReducer } from 'react';
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
 import IngredientList from './IngredientList';
 import ErrorModal from '../UI/ErrorModal';
 
+const ingredientReducer = (currentIngredients, action) => {
+  switch (action.type) {
+    case 'SET':
+      return action.ingredients;
+    case 'ADD':
+      return [...currentIngredients, action.ingredient];
+    case 'DELETE':
+      return currentIngredients.filter(ing => ing.id !== action.id)
+    default:
+      throw new Error('Should not get there!')
+  }
+}
+
 const Ingredients = () => {
 
-  const [ingredients, setIngredients] = useState([]);
+  const initialIngrdients = []
+  const [ingredients, dispatch] = useReducer(ingredientReducer, initialIngrdients)
+
+  // const [ingredients, setIngredients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
 
@@ -29,10 +45,7 @@ const Ingredients = () => {
       setIsLoading(false)
       return response.json()
     }).then(responseData => {
-      setIngredients(prevIngredients =>
-        [...prevIngredients,
-        { id: responseData.name, ...ingredient }
-        ])
+      dispatch({ type: 'ADD', ingredient: { id: responseData.name, ...ingredient } })
     }).catch(error => {
       setError("Something went wrong!")
       setIsLoading(false)
@@ -45,9 +58,7 @@ const Ingredients = () => {
       method: 'DELETE',
     }).then(response => {
       setIsLoading(false)
-      setIngredients(prevIngredients =>
-        prevIngredients.filter(ingredient => ingredient.id !== ingredientID)
-      )
+      dispatch({type: 'DELETE', id: ingredientID})
     }
     ).catch(error => {
       setError("Something went wrong!")
@@ -58,7 +69,7 @@ const Ingredients = () => {
   const filteredIngredientsHandler =
     useCallback(
       filteredIngredients =>
-        setIngredients(filteredIngredients)
+        dispatch({ type: 'SET', ingredients: filteredIngredients })
       , [])
 
   const clearError = () => {

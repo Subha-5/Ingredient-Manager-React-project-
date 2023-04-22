@@ -26,14 +26,19 @@ const Ingredients = () => {
   const initialIngrdients = []
   const [ingredients, dispatch] = useReducer(ingredientReducer, initialIngrdients)
 
-  const { isLoading, error, data, sendRequest } = useHTTP()
+  const { isLoading, error, data, sendRequest, reqExtra, reqIdentifier } = useHTTP()
 
   // No need for useEffect to fetch ingredients in this Component
   // since Search Component is already fetching it in the first initial render
 
   useEffect(() => {
-    console.log('RENDERING INGREDIENTS ... ', ingredients)
-  }, [ingredients])
+    if ( !isLoading && !error && reqIdentifier === 'REMOVE_INGREDIENT') {
+      dispatch({ type: 'DELETE', id: reqExtra })
+    }
+    else if ( !isLoading && !error && reqIdentifier === 'ADD_INGREDIENT') {
+      dispatch({ type: 'ADD', ingredient: { id: data.name, ...reqExtra } })
+    }
+  }, [data, reqExtra, reqIdentifier, isLoading, error])
 
   const addIngredientHandler =
     useCallback((ingredient) => {
@@ -53,7 +58,9 @@ const Ingredients = () => {
       sendRequest(
         'https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients.json',
         'POST',
-        JSON.stringify(ingredient)
+        JSON.stringify(ingredient),
+        ingredient,
+        'ADD_INGREDIENT'
       )
     }, [sendRequest])
 
@@ -72,7 +79,9 @@ const Ingredients = () => {
       sendRequest(
         `https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients/${ingredientID}.json`,
         'DELETE',
-        null
+        null,
+        ingredientID,
+        'REMOVE_INGREDIENT'
       )
     }, [sendRequest])
 

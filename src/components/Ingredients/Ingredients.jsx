@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useReducer } from 'react';
+import React, { useEffect, useCallback, useReducer, useMemo } from 'react';
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
@@ -48,34 +48,36 @@ const Ingredients = () => {
   }, [ingredients])
 
 
-  const addIngredientHandler = (ingredient) => {
-    dispatchHTTP({ type: 'SEND' })
-    fetch('https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients.json', {
-      method: 'POST',
-      body: JSON.stringify(ingredient),
-      headers: { 'Content-Type': 'application/json' }
-    }).then(response => {
-      dispatchHTTP({ type: 'RESPONSE' })
-      return response.json()
-    }).then(responseData => {
-      dispatch({ type: 'ADD', ingredient: { id: responseData.name, ...ingredient } })
-    }).catch(error => {
-      dispatchHTTP({ type: 'ERROR', errorMessage: 'Something went wrong!' })
-    })
-  }
+  const addIngredientHandler =
+    useCallback((ingredient) => {
+      dispatchHTTP({ type: 'SEND' })
+      fetch('https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients.json', {
+        method: 'POST',
+        body: JSON.stringify(ingredient),
+        headers: { 'Content-Type': 'application/json' }
+      }).then(response => {
+        dispatchHTTP({ type: 'RESPONSE' })
+        return response.json()
+      }).then(responseData => {
+        dispatch({ type: 'ADD', ingredient: { id: responseData.name, ...ingredient } })
+      }).catch(error => {
+        dispatchHTTP({ type: 'ERROR', errorMessage: 'Something went wrong!' })
+      })
+    }, [])
 
-  const removeIngredientHandler = (ingredientID) => {
-    dispatchHTTP({ type: 'SEND' })
-    fetch(`https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients/${ingredientID}.json`, {
-      method: 'DELETE',
-    }).then(response => {
-      dispatchHTTP({ type: 'RESPONSE' })
-      dispatch({ type: 'DELETE', id: ingredientID })
-    }
-    ).catch(error => {
-      dispatchHTTP({ type: 'ERROR', errorMessage: 'Something went wrong!' })
-    })
-  }
+  const removeIngredientHandler =
+    useCallback((ingredientID) => {
+      dispatchHTTP({ type: 'SEND' })
+      fetch(`https://learn-react-hooks-b2651-default-rtdb.firebaseio.com/ingredients/${ingredientID}.json`, {
+        method: 'DELETE',
+      }).then(response => {
+        dispatchHTTP({ type: 'RESPONSE' })
+        dispatch({ type: 'DELETE', id: ingredientID })
+      }
+      ).catch(error => {
+        dispatchHTTP({ type: 'ERROR', errorMessage: 'Something went wrong!' })
+      })
+    }, [])
 
   const filteredIngredientsHandler =
     useCallback(
@@ -83,9 +85,18 @@ const Ingredients = () => {
         dispatch({ type: 'SET', ingredients: filteredIngredients })
       , [])
 
-  const clearError = () => {
-    dispatchHTTP({type: 'CLEAR_ERR'})
-  }
+  const clearError = useCallback(() => {
+    dispatchHTTP({ type: 'CLEAR_ERR' })
+  }, [])
+
+  const ingredientList =
+    useMemo(() => {
+      return (
+        <IngredientList
+          ingredients={ingredients}
+          onRemoveItem={removeIngredientHandler}
+        />)
+    }, [ingredients, removeIngredientHandler])
 
   return (
     <div className="App">
@@ -101,10 +112,7 @@ const Ingredients = () => {
         <Search
           onLoadIngredients={filteredIngredientsHandler}
         />
-        <IngredientList
-          ingredients={ingredients}
-          onRemoveItem={removeIngredientHandler}
-        />
+        {ingredientList}
       </section>
     </div>
   );

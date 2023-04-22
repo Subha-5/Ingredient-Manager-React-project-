@@ -1,0 +1,63 @@
+*Hooks*
+1) always use hooks in functional components and other custom hooks
+2) always use hooks in the root level of functional components
+
+*useState*
+- states survive component rerender cycles
+- event object when used in closures have a risk of using older event
+- previousState available through setState function helps us get the latest snapshots
+- array destructuring
+- if we update a certain part of object with and leave others untouched, we can get "uncontrolled components" problem
+- in class based components, state has to be an object and react merges with automatically with previous state, whereas
+- in functional components, state need not be an object and state is always rewritten completely
+- it's recommended to split state into multiple states, especially for objects (managing states independently)
+- React batches state updates, meaning that only one state will only be available before then in the next render, we can get the next updated state. 
+
+*useEffect*
+- side effects while component renders
+- useEffect gets executed after every render cycle (by default). (no dependency array)
+- dependency array: should only include external dependencies (useEffect code executes only if these external dependencies change)
+- empty dependency array: useEffect acts like componentDidMount: It runs only once (after the first render)
+- if the props change and have an effect in useEffect then destructure the prop object to only include the element or part in object that really changes
+- useEffect cleaning effect (return a function from the first argument i.e also a function : meaning a function returns a function)
+- the returned function is also called a cleanup function which only runs before the next time the argument function of useEffect runs
+- Note: the cleanup function will run for the previous effect before the next effect is applied
+- if you have [] as dependencies (i.e. the effect only runs once) the cleanup function runs when the component gets unmounted
+
+*useCallback*
+- allows us to wrap a function inside it (first argument)
+- dependency array of the function (second argument)
+- react caches the function inside it for next rerender cycles and
+- we always get the old snapshot of the function since it survives even after multiple rerenders
+- react compares the old snap of the function with the current snap and if both functions are same, react considers them the same and never regenerates it for the next render
+
+*useRef*
+- useRef is a React Hook that lets you reference a value that’s not needed for rendering.
+- on input jsx tag, ref is used to connect input's current value to various other places in the component
+
+*useReducer*
+- useReducers take multiple state changes interrelated to each other and manages them in one single place
+- Reducers are functions that take input and return an output, defined outside a functional component
+- useReducer has no connection to Redux library
+- we are the ones dispatching the action later, so we can decide which data is inside it
+- what is returned by reducer function replaces in first argument of the reducer function i.e. currentList
+- the reducer function alone doesn't do much, we need to initialize it by calling useReducer.
+- returns an array with two values, the current-state and a dispatch function to execute the action object, which are then handled by reducer
+- when working with useReducer(), React will re-render the component whenever our reducer returns the new state
+- consider using reducer, if we have such a state which is complex and that might also depend on previous state, to have a cleaner logic
+
+*useContext*
+- useContext : Context lets the parent component make some information available to any component in the tree below it—no matter how deep—without passing it explicitly through props
+- context.Provider : component that provides data to entire component tree and "value" prop passes context data to the descendant components which can use the provided data through context.Consumer or useContext() hook
+- value prop accepts any data which the descendant components will re-render to reflect the updated context data.
+
+*useMemo*
+- useMemo is a hook where you can save a value, which is saved so that the value isn't recreated (just like for functions using useCallback)
+- with useMemo we can store any data, which we don't want to recreate on every re-render cycle of the components
+- can be used with complex operation with data where we really don't want to recalculate on every re-render but when we really want to calculate them again
+
+*CUSTOM HOOKS*
+- custom hooks are hooks made by us to share the logic (not the data) across different components
+- we can have stateful logic in custom hooks but the stateful logic will be different for each component where we use that hook
+- custom hook rerun with every re-render cycle : Our hooks will be called whenever the component where we are using the hook gets re-executed.
+- we are able to share stateful logic in our components, (because we can use useReducer in our hook and we dispatch the action that actually triggers React to rebuild the component where we use the hook)
